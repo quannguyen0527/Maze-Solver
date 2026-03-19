@@ -1,0 +1,8 @@
+# Python / Windows
+*.pyc
+__pycache__/
+venv/
+.vscode/
+*.log
+Thumbs.db
+Desktop.ini
