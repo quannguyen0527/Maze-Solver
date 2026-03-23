@@ -11,7 +11,7 @@ def load_hazards(path):
         for j in range(len(data[0])):
             r, g, b = data[i][j]
 
-            # 🔥 STRICT detection (NO ranges)
+            # STRICT detection (NO ranges)
             if (r, g, b) == (255, 0, 0):
                 hazards[(i, j)] = "pit"
 
