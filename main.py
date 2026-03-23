@@ -1,14 +1,32 @@
 from agent import NaiveAgent
 from environment import MazeEnvironment
 from maze_loader import MazeLoader
-
-from planner import astar
-from visualizer import show_maze
 from hazard_loader import load_hazards
+
+import numpy as np
+import matplotlib.pyplot as plt
+from collections import deque
 
 
 # ===============================
-# 1. LOAD MAZE (NO HAZARDS)
+# VISUALIZATION (PIXEL-BASED)
+# ===============================
+def show_pixel_path(grid, path):
+    # convert to RGB image
+    img = np.stack([grid * 255]*3, axis=-1).astype(np.uint8)
+
+    # draw path (red)
+    for (x, y) in path:
+        img[x, y] = [255, 0, 0]
+
+    plt.imshow(img)
+    plt.title("Maze Solution (Pixel BFS)")
+    plt.axis('off')
+    plt.show()
+
+
+# ===============================
+# 1. LOAD MAZE
 # ===============================
 def test_png_loading():
     print("=== Testing PNG Loader ===")
@@ -23,22 +41,73 @@ def test_png_loading():
 
 
 # ===============================
-# 2. SOLVE MAZE USING A*
+# 2. SOLVE MAZE USING BFS
 # ===============================
 def solve_maze(grid):
-    print("\n=== Solving Maze with A* ===")
+    print("\n=== Solving Maze with BFS (Pixel-based) ===")
 
-    # You may need to adjust start/goal depending on image
-    start = (0, 0)
-    goal = (len(grid) - 1, len(grid[0]) - 1)
+    h, w = grid.shape
 
-    path = astar(grid, start, goal)
+    # find start (top row open)
+    start = None
+    for i in range(w):
+        if grid[0][i] == 0:
+            start = (0, i)
+            break
 
-    if path:
-        print(f"✅ Path found! Length = {len(path)}")
-        show_maze(grid, path)
-    else:
-        print("❌ No path found")
+    # find goal (bottom row open)
+    goal = None
+    for i in range(w):
+        if grid[h-1][i] == 0:
+            goal = (h-1, i)
+            break
+
+    print("Start:", start)
+    print("Goal:", goal)
+
+    if start is None or goal is None:
+        print("❌ Could not find start or goal")
+        return None
+
+    # BFS
+    q = deque([start])
+    visited = set([start])
+    parent = {}
+
+    directions = [(1,0), (-1,0), (0,1), (0,-1)]
+
+    while q:
+        cur = q.popleft()
+
+        if cur == goal:
+            break
+
+        for dx, dy in directions:
+            nx, ny = cur[0] + dx, cur[1] + dy
+
+            if 0 <= nx < h and 0 <= ny < w:
+                if grid[nx][ny] == 0 and (nx, ny) not in visited:
+                    visited.add((nx, ny))
+                    parent[(nx, ny)] = cur
+                    q.append((nx, ny))
+
+    # reconstruct path
+    path = []
+    cur = goal
+
+    while cur != start:
+        path.append(cur)
+        cur = parent.get(cur)
+        if cur is None:
+            print("❌ Path reconstruction failed")
+            return None
+
+    path.append(start)
+    path.reverse()
+
+    print(f"✅ Path found! Length = {len(path)}")
+
+    show_pixel_path(grid, path)
 
     return path
 
@@ -53,12 +122,10 @@ def demo_hazards():
 
     print(f"Total hazards detected: {len(hazards)}")
 
-    # Show some examples
     sample = list(hazards.items())[:10]
     for pos, h_type in sample:
         print(f"At {pos}: {h_type}")
 
-    # Demonstrate behavior
     print("\n--- Simulating hazard effects ---")
 
     for pos, h_type in sample[:3]:
@@ -77,7 +144,7 @@ def demo_hazards():
 
 
 # ===============================
-# 4. RUN ENVIRONMENT (NAIVE AGENT)
+# 4. RUN ENVIRONMENT
 # ===============================
 def run_episode():
     print("\n=== Running Environment (Naive Agent) ===")
@@ -91,7 +158,7 @@ def run_episode():
     last_result = None
     turn_count = 0
 
-    while turn_count < 200:  # keep shorter for demo
+    while turn_count < 200:
         actions = agent.plan_turn(last_result)
         result = env.step(actions)
 
@@ -115,14 +182,7 @@ def run_episode():
 # MAIN
 # ===============================
 if __name__ == "__main__":
-    # Step 1: Load maze
     grid = test_png_loading()
-
-    # Step 2: Solve maze (A*)
     solve_maze(grid)
-
-    # Step 3: Demonstrate hazards
     demo_hazards()
-
-    # Step 4: Run naive agent in environment
     run_episode()
