@@ -11,14 +11,14 @@ def load_hazards(path):
         for j in range(len(data[0])):
             r, g, b = data[i][j]
 
-            # Example color detection (you adjust based on your image)
-            if r > 200 and g < 50 and b < 50:
+            # 🔥 STRICT detection (NO ranges)
+            if (r, g, b) == (255, 0, 0):
                 hazards[(i, j)] = "pit"
 
-            elif g > 200 and r < 50:
+            elif (r, g, b) == (0, 255, 0):
                 hazards[(i, j)] = "teleport"
 
-            elif b > 200:
+            elif (r, g, b) == (0, 0, 255):
                 hazards[(i, j)] = "confusion"
 
     return hazards

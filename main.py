@@ -11,16 +11,31 @@ from collections import deque
 # ===============================
 # VISUALIZATION (PIXEL-BASED)
 # ===============================
-def show_pixel_path(grid, path):
-    # convert to RGB image
+def show_maze_with_hazards(grid, path=None, hazards=None):
+    # base image
     img = np.stack([grid * 255]*3, axis=-1).astype(np.uint8)
 
     # draw path (red)
-    for (x, y) in path:
-        img[x, y] = [255, 0, 0]
+    if path:
+        for (x, y) in path:
+            img[x, y] = [255, 0, 0]
 
+    # draw hazards
+    if hazards:
+        for (x, y), h_type in hazards.items():
+
+            if h_type == "pit":
+                img[x, y] = [0, 0, 255]      # 🔵 blue
+
+            elif h_type == "teleport":
+                img[x, y] = [255, 255, 0]    # 🟡 yellow
+
+            elif h_type == "confusion":
+                img[x, y] = [255, 0, 255]    # 🟣 purple
+
+    plt.figure(figsize=(8,8))
     plt.imshow(img)
-    plt.title("Maze Solution (Pixel BFS)")
+    plt.title("Maze + Hazards + Path")
     plt.axis('off')
     plt.show()
 
@@ -107,7 +122,8 @@ def solve_maze(grid):
 
     print(f"✅ Path found! Length = {len(path)}")
 
-    show_pixel_path(grid, path)
+    hazards = load_hazards("mazes/maze2.png")
+    show_maze_with_hazards(grid, path, hazards)
 
     return path
 
@@ -122,13 +138,9 @@ def demo_hazards():
 
     print(f"Total hazards detected: {len(hazards)}")
 
-    sample = list(hazards.items())[:10]
+    sample = list(hazards.items())[:5]
+
     for pos, h_type in sample:
-        print(f"At {pos}: {h_type}")
-
-    print("\n--- Simulating hazard effects ---")
-
-    for pos, h_type in sample[:3]:
         print(f"\nAgent steps on {pos}")
 
         if h_type == "pit":
@@ -138,7 +150,7 @@ def demo_hazards():
             print("🌀 Agent teleports to another location")
 
         elif h_type == "confusion":
-            print("🤯 Controls inverted (UP↔DOWN, LEFT↔RIGHT)")
+            print("🤯 Controls inverted")
 
     return hazards
 
