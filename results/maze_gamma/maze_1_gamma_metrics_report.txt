@@ -1,0 +1,31 @@
+Silent Cartographer Third Check-in Metrics
+==================================================
+
+Maze Label: gamma
+Maze Path: maze_gamma/maze_1.png
+Workflow: train=honest, solve=hybrid
+Chosen method: hybrid reinforcement learning plus model-based planning. Training/practice uses HONEST mode, so the agent updates Q-values and transition memory only from TurnResult feedback. Solving/evaluation then uses HYBRID mode: the image-derived environment model is loaded into the same agent and the planner runs hazard-aware time-expanded A* over (position, time mod fire-cycle). This is necessary because rotating fire makes safety depend on both location and time.
+
+No training loop was run on this maze. This is direct transfer/evaluation.
+
+Evaluation Episodes
+----------------------
+Eval 01: goal=True, turns=264, deaths=0, path_length=264, explored=256, exploration_efficiency=0.9624, map_completeness=0.0625
+Eval 02: goal=True, turns=264, deaths=0, path_length=264, explored=256, exploration_efficiency=0.9624, map_completeness=0.0625
+Eval 03: goal=True, turns=264, deaths=0, path_length=264, explored=256, exploration_efficiency=0.9624, map_completeness=0.0625
+Eval 04: goal=True, turns=264, deaths=0, path_length=264, explored=256, exploration_efficiency=0.9624, map_completeness=0.0625
+Eval 05: goal=True, turns=264, deaths=0, path_length=264, explored=256, exploration_efficiency=0.9624, map_completeness=0.0625
+
+Required Metrics
+----------------
+Success Rate: 100.00%
+Average Path Length: 264.0
+Average Turns to Solution: 264.0
+Death Rate: 0.0000
+
+Bonus Metrics
+-------------
+Exploration Efficiency: 0.9624
+Map Completeness: 0.0625
+Average Confusions: 0.00
+Average Arrow Pushes: 0.00
